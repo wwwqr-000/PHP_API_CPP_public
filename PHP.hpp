@@ -15,6 +15,7 @@ class PHP {
         }
 
         int index;
+        bool usingTor;
         std::string endpoint;
         std::vector<std::string> headers;
         std::string last_result;
@@ -75,10 +76,14 @@ class PHP {
         }
 
     public:
-        PHP(std::string endpoint_in, std::vector<std::string> headers_in) {
+        PHP(std::string endpoint_in, std::vector<std::string> headers_in, bool usingTor_in = false) {
             index = ++globalPhpObjCount;
             endpoint = endpoint_in;
             headers = headers_in;
+            usingTor = usingTor_in;
+            if (usingTor) {
+                system("start tor.vbs");
+            }
         }
         std::string getEndpoint() {
             return endpoint;
@@ -108,7 +113,11 @@ class PHP {
                 }
             }
             code = final_code;
-            std::string curlCommand = "curl -k -s -H \"Content-Type: " + headers[0] + "\" -H \"Protocol: " + headers[1] + "\" -H \"Type: " + headers[2] + "\" -H \"Name: " + headers[3] + "\" -H \"Password: " + headers[4] + "\" -H \"J1: " + headers[5] + "\" -H \"J2: " + headers[6] + "\" -H \"J3: " + headers[7] + "\" -H \"J4: " + headers[8] + "\" -H \"J5: " + headers[9] + "\" -H \"Code: " + code + "\" -H \"Dqcode: " + headers[10] + "\" -H \"Sqcode: " + headers[11] + "\" \"" + endpoint + "\"";
+            std::string curlHeadCommand = "curl";
+            if (usingTor) {
+                curlHeadCommand = "curl --socks5-hostname localhost:9050";
+            }
+            std::string curlCommand = curlHeadCommand + " -k -s -H \"Content-Type: " + headers[0] + "\" -H \"Protocol: " + headers[1] + "\" -H \"Type: " + headers[2] + "\" -H \"Name: " + headers[3] + "\" -H \"Password: " + headers[4] + "\" -H \"J1: " + headers[5] + "\" -H \"J2: " + headers[6] + "\" -H \"J3: " + headers[7] + "\" -H \"J4: " + headers[8] + "\" -H \"J5: " + headers[9] + "\" -H \"Code: " + code + "\" -H \"Dqcode: " + headers[10] + "\" -H \"Sqcode: " + headers[11] + "\" \"" + endpoint + "\"";
             last_result = exec(curlCommand.c_str());
             return last_result;
         }
