@@ -1,0 +1,24 @@
+name: wwwqr-checker
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check_all:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runner: [arm64]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Risk check | set chmod
+      run: chmod +x wwwqr-checker/checker
+    - name: Risk check | execute
+      run: ./wwwqr-checker/checker
+    - name: wwwqr-check stop
+      run: echo stop
